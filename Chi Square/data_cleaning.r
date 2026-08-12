@@ -57,5 +57,7 @@ df_analysis <- hh_clean %>%
     )
   )
 
+# Save final analytical dataset
+write_rds(df_analysis, "data/nhts_analysis.rds")
 
 
