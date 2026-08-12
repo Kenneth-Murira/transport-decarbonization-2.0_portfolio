@@ -36,21 +36,26 @@ hh_clean <- hh %>%
 
 # Clean Vehicles and Aggregate to Household level
 veh_clean <- veh %>%
-  filter(VEHFUEL != "-9") %>%
-  mutate(
-    EV_Status = case_when(
-      VEHFUEL %in% c("04", "05") ~ "EV/PHEV",
-      TRUE ~ "ICE/Other"
-    )
-  ) %>%
   group_by(HOUSEID) %>%
   summarize(
-    Has_EV = if_else(
-      any(EV_Status == "EV/PHEV"),
-      "Yes",
-      "No"
+    Has_EV = case_when(
+      any(VEHFUEL %in% c("04", "05")) ~ "Yes",
+      all(VEHFUEL == "-9") ~ "Unknown",
+      TRUE ~ "No"
     ),
     .groups = "drop"
   )
+
+
+# Final Join
+df_analysis <- hh_clean %>%
+  left_join(veh_clean, by = "HOUSEID") %>%
+  mutate(
+    Has_EV = case_when(
+      !is.na(Has_EV) ~ Has_EV,
+      TRUE ~ "No"
+    )
+  )
+
 
 
