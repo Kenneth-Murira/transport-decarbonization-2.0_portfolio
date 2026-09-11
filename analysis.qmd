@@ -1,0 +1,127 @@
+---
+title: "NHTS EV Ownership Analysis"
+author: "Kenneth Murira"
+format: html
+editor: visual
+---
+
+```{r}
+# Load Packages
+library(readr)
+library(dplyr)
+library(purrr)
+library(tibble)
+
+```
+
+```{r}
+# Run/load the categorical audit
+source("R/categorical_audit.R")
+```
+
+```{r}
+# Check that audit results are named
+names(audit_results)
+```
+
+```{r}
+# Function to convert residual matrices into tidy data frames
+get_residuals_df <- function(audit_list, predictor_name) {
+  
+  res_matrix <- audit_list[[predictor_name]]$residuals
+  
+  res_df <- as.data.frame(as.table(res_matrix))
+  
+  colnames(res_df) <- c(
+    "Predictor_Level",
+    "Has_EV",
+    "Std_Residual"
+  )
+  
+  res_df$Predictor <- predictor_name
+  
+  return(res_df)
+}
+```
+
+```{r}
+# Extract and combine standardized residuals
+heatmap_data <- map_dfr(
+  names(audit_results),
+  ~ get_residuals_df(audit_results, .x)
+)
+
+```
+
+```{r}
+# Add Interpretation
+heatmap_data <- heatmap_data %>%
+  mutate(
+    Residual_Interpretation = case_when(
+      Std_Residual > 2 ~ "More than expected",
+      Std_Residual < -2 ~ "Less than expected",
+      TRUE ~ "Close to expected"
+    )
+  )
+```
+
+```{r}
+# View all residual data
+heatmap_data
+```
+
+```{r}
+# View cells with substantial departures from independence
+heatmap_data %>%
+  filter(abs(Std_Residual) > 2) %>%
+  arrange(desc(abs(Std_Residual)))
+```
+
+```{r}
+# Plot the Heat Map
+# Load the theme_decarb function
+source("R/theme_decarb.R")
+```
+
+```{r}
+# Plotting the Heat Map
+ggplot(
+  heatmap_data,
+  aes(
+    x = Has_EV,
+    y = Predictor_Level,
+    fill = Std_Residual
+  )
+) +
+  geom_tile(
+    color = "white",
+    linewidth = 0.5
+  ) +
+  geom_text(
+    aes(label = round(Std_Residual, 1)),
+    size = 3
+  ) +
+  scale_fill_gradient2(
+    low = "#D73027",
+    mid = "white",
+    high = "#4575B4",
+    midpoint = 0,
+    limits = c(
+      -max(abs(heatmap_data$Std_Residual)),
+      max(abs(heatmap_data$Std_Residual))
+    )
+  ) +
+  facet_wrap(
+    ~ Predictor,
+    scales = "free_y",
+    ncol = 1
+  ) +
+  theme_decarb() +
+  labs(
+    title = "Demographic Drivers of Early EV Adoption",
+    subtitle = "Standardized Pearson Residuals: Blue = higher than expected; Red = lower than expected",
+    x = "Household EV/PHEV Ownership",
+    y = NULL,
+    fill = "Std. Residual"
+  )
+```
