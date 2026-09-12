@@ -18,7 +18,7 @@ source("R/audit_functions.R")
 df_audit <- df_analysis %>%
   filter(Has_EV %in% c("Yes", "No"))
 
-#Define categorical predictors
+# Define categorical predictors
 predictors <- c(
   "Income_Bracket",
   "Region",
@@ -44,6 +44,3 @@ audit_summary <- map_dfr(
 
 # Display final results
 audit_summary
-
-
-

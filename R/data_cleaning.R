@@ -1,9 +1,9 @@
-#load data
+# load data
 library(tidyverse)
 hh <- read_csv("data-raw/hhv2pub.csv")
 veh <- read_csv("data-raw/vehv2pub.csv")
 
-#Clean Household Demographics
+# Clean Household Demographics
 hh_clean <- hh %>%
   mutate(
     HHFAMINC_num = as.numeric(HHFAMINC)
@@ -17,14 +17,12 @@ hh_clean <- hh %>%
       HHFAMINC_num %in% 8:9 ~ "4. Upper Mid ($100k-$150k)",
       HHFAMINC_num %in% 10:11 ~ "5. High (>$150k)"
     ),
-
     Region = case_when(
       CENSUS_R == "01" ~ "Northeast",
       CENSUS_R == "02" ~ "Midwest",
       CENSUS_R == "03" ~ "South",
       CENSUS_R == "04" ~ "West"
     ),
-
     HH_Size = case_when(
       HHSIZE == 1 ~ "1 Person",
       HHSIZE == 2 ~ "2 People",
@@ -59,5 +57,3 @@ df_analysis <- hh_clean %>%
 
 # Save final analytical dataset
 write_rds(df_analysis, "data/nhts_analysis.rds")
-
-

@@ -11,7 +11,6 @@ library(testthat)
 source("../../R/audit_functions.R")
 
 test_that("run_categorical_audit returns expected list structure", {
-
   # Generate reproducible dummy data
   set.seed(123)
 

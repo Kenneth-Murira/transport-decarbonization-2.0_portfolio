@@ -9,24 +9,19 @@ theme_decarb <- function() {
         size = 16,
         margin = margin(b = 8)
       ),
-
       plot.subtitle = element_text(
         color = "gray30",
         margin = margin(b = 15)
       ),
-
       strip.background = element_rect(
         fill = "#2C3E50",
         color = NA
       ),
-
       strip.text = element_text(
         face = "bold",
         color = "white"
       ),
-
       panel.grid.minor = element_blank(),
-
       axis.text = element_text(
         color = "black"
       )
